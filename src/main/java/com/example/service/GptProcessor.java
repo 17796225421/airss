@@ -13,10 +13,10 @@ import java.util.Map;
 
 public class GptProcessor {
     private OkHttpClient client;
-    private String apiKey="sk-GwRaUfEtHAhobdxA1299858776274f47B32030Ac7cCdE0B5";
-    private String gptVersion="gpt-3.5-turbo-1106";
-    private int maxTokens=100;
-    private String website="https://gpts.onechat.fun";
+    private String apiKey = "sk-GwRaUfEtHAhobdxA1299858776274f47B32030Ac7cCdE0B5";
+    private String gptVersion = "gpt-3.5-turbo-1106";
+    private int maxTokens = 4000;
+    private String website = "https://gpts.onechat.fun";
     private Gson gson;
 
     public GptProcessor() {
@@ -24,7 +24,10 @@ public class GptProcessor {
         this.gson = new Gson();
     }
 
-    public String processArticle(String article) {
+    public String processArticle(String title, String description) {
+        String article = "title:" + title
+                + "\\n description:" + Jsoup.parse(description).text() + "\\n";
+
         // 构造请求URL
         String url = website + "/v1/chat/completions";
 
@@ -55,6 +58,7 @@ public class GptProcessor {
                 .post(RequestBody.create(json, MediaType.parse("application/json")))
                 .build();
 
+        String newDescription = "";
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
@@ -66,26 +70,13 @@ public class GptProcessor {
                 JsonObject firstChoice = choices.get(0).getAsJsonObject();
                 if (firstChoice.has("message") && firstChoice.getAsJsonObject("message").has("content")) {
                     String content = firstChoice.getAsJsonObject("message").get("content").getAsString();
-                    // 创建一个新的<p>元素来包含摘要
-                    String summaryElement = "<p>" + content + "</p>";
-
-                    // 解析HTML内容并将摘要插入到<body>元素的开头
-                    Document doc = Jsoup.parse(article);
-                    doc.body().prepend(summaryElement);
-
-                    // 获取修改后的HTML内容
-                    article = doc.html();
+                    // 在content后面添加一个<br>标签，然后再添加description
+                    newDescription = content + "<br>";
                 }
             }
+            newDescription += description;
 
-            // 如果没有生成摘要，将"No summary available."插入到<body>元素的开头
-            if (article == null) {
-                Document doc = Jsoup.parse(article);
-                doc.body().prepend("<p>No summary available.</p>");
-                article = doc.html();
-            }
-
-            return article;
+            return newDescription;
         } catch (Exception e) {
             throw new RuntimeException("Failed to process article", e);
         }

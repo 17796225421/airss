@@ -42,7 +42,7 @@ public class RssListenerThread extends Thread {
                     if (!processedEntries.contains(entry.getLink())) {
                         // 处理文章
                         GptProcessor gptProcessor = new GptProcessor();
-                        String processedArticle = gptProcessor.processArticle(entry.getDescription().getValue());
+                        String processedArticle = gptProcessor.processArticle(entry.getTitle(),entry.getDescription().getValue());
                         // 创建新的SyndEntry
                         SyndEntry newEntry = new SyndEntryImpl();
                         newEntry.setTitle(entry.getTitle());
