@@ -18,11 +18,10 @@ public class RssController {
     }
 
     @PostMapping("/addRss")
-    public ResponseEntity<String> addRss(@RequestBody String rssUrl, @RequestParam String rssName) {
+    public ResponseEntity<String> addRss(@RequestParam String rssUrl, @RequestParam String rssName) {
         rssSourceManager.addRssSource(rssUrl, rssName);
         return ResponseEntity.ok("RSS源已添加");
     }
-
 
     @GetMapping("/viewRss")
     public ResponseEntity<List<String>> viewRss() {
