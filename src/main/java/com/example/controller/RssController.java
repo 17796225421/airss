@@ -1,51 +1,41 @@
 package com.example.controller;
 
-import com.example.service.RssSourceManager;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.example.model.RssSource;
+import com.example.service.RssSourceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
+@RequestMapping("/rss")
 public class RssController {
-    private final RssSourceManager rssSourceManager;
+    @Autowired
+    private RssSourceService rssSourceService;
 
-    public RssController(RssSourceManager rssSourceManager) {
-        this.rssSourceManager = rssSourceManager;
+    // 添加rss源
+    @PostMapping("/add")
+    public String addRssSource(@RequestBody RssSource rssSource) {
+        rssSourceService.addRssSource(rssSource);
+        return "Rss source added successfully!";
     }
 
-    @PostMapping("/addRss")
-    public ResponseEntity<String> addRss(@RequestParam String rssUrl, @RequestParam String rssName) {
-        rssSourceManager.addRssSource(rssUrl, rssName);
-        return ResponseEntity.ok("RSS源已添加");
+    // 删除rss源
+    @DeleteMapping("/delete/{name}")
+    public String deleteRssSource(@PathVariable String name) {
+        rssSourceService.deleteRssSource(name);
+        return "Rss source deleted successfully!";
     }
 
-    @GetMapping("/viewRss")
-    public ResponseEntity<List<String>> viewRss() {
-        // 这里我们先返回一个空列表
-        return ResponseEntity.ok(Collections.emptyList());
+    // 查看所有rss源
+    @GetMapping("/all")
+    public List<String> getAllRssSourcesName() {
+        return rssSourceService.getAllRssSourcesName();
     }
 
-    @DeleteMapping("/deleteRss")
-    public ResponseEntity<String> deleteRss(@RequestBody String rssUrl) {
-        // 这里我们先返回一个默认的响应
-        return ResponseEntity.ok("删除RSS源的功能尚未实现");
+    // 获取指定rss源文件
+    @GetMapping("/get/{name}")
+    public RssSource getRssSource(@PathVariable String name) {
+        return rssSourceService.getRssSource(name);
     }
-
-    @GetMapping("/rss/{rssName}")
-    public ResponseEntity<Resource> getRss(@PathVariable String rssName) {
-        // 获取RSS源文件
-        Resource rssFile = rssSourceManager.getRssFile(rssName);
-        if (rssFile == null) {
-            // 如果找不到RSS源文件，返回404 Not Found
-            return ResponseEntity.notFound().build();
-        } else {
-            // 如果找到RSS源文件，返回文件内容
-            return ResponseEntity.ok(rssFile);
-        }
-    }
-
 }
