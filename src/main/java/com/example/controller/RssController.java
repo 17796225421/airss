@@ -20,22 +20,22 @@ public class RssController {
         return "Rss source added successfully!";
     }
 
-    // 删除rss源
-    @DeleteMapping("/delete/{name}")
-    public String deleteRssSource(@PathVariable String name) {
-        rssSourceService.deleteRssSource(name);
+    // 删除rss源，使用id作为参数
+    @DeleteMapping("/delete/{id}")
+    public String deleteRssSource(@PathVariable int id) {
+        rssSourceService.deleteRssSource(id);
         return "Rss source deleted successfully!";
     }
 
-    // 查看所有rss源
+    // 查看所有rss源，返回RssSource列表
     @GetMapping("/all")
-    public List<String> getAllRssSourcesName() {
-        return rssSourceService.getAllRssSourcesName();
+    public List<RssSource> getAllRssSources() {
+        return rssSourceService.getAllRssSources();
     }
 
-    // 获取指定rss源文件
-    @GetMapping("/get/{name}")
-    public RssSource getRssSource(@PathVariable String name) {
-        return rssSourceService.getRssSource(name);
+    // 获取指定rss源，使用id作为参数
+    @GetMapping("/get/{id}")
+    public String getRssSource(@PathVariable int id) {
+        return rssSourceService.getRssSource(id);
     }
 }

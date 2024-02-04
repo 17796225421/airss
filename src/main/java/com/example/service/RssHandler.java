@@ -1,5 +1,6 @@
 package com.example.service;
 
+import java.nio.file.Files;
 import com.example.model.RssSource;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
@@ -33,23 +34,22 @@ public class RssHandler {
     }
 
     public void bindAndStart(RssSource rssSource) {
-        // 创建一个哈希表来存储已处理过的item的链接
-        Set<String> processedLinks = new HashSet<>();
-
         // 创建一个SyndFeed对象
         SyndFeed feed = new SyndFeedImpl();
         feed.setFeedType("rss_2.0");
         feed.setTitle(rssSource.getName());
         feed.setLink(rssSource.getUrl());
-        feed.setDescription(rssSource.getUrl());
+        feed.setDescription("无");
         feed.setEntries(new ArrayList<>());
 
         // 创建一个XML文件
-        File file = new File("rssFiles/" + rssSource.getName() + ".xml");
-        try (Writer writer = new FileWriter(file)) {
-            new SyndFeedOutput().output(feed, writer);
-        } catch (Exception e) {
-            e.printStackTrace();
+        File file = new File("rssFiles/" + rssSource.getId() + ".xml");
+        if (!file.exists()) { // 如果文件不存在
+            try (Writer writer = new FileWriter(file)) {
+                new SyndFeedOutput().output(feed, writer);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         // 创建一个Runnable任务，该任务会周期性地读取RSS源的所有item，并处理未处理过的item
@@ -59,18 +59,21 @@ public class RssHandler {
                 SyndFeedInput input = new SyndFeedInput();
                 List<SyndEntry> items = input.build(new XmlReader(feedUrl)).getEntries();
                 List<SyndEntry> newEntries = new ArrayList<>();
+                System.out.println("更新开始");
+
+                // 读取XML文件内容
+                String xmlContent = new String(Files.readAllBytes(file.toPath()));
+
                 for (SyndEntry syndEntry : items) {
                     String link = syndEntry.getLink();
                     // 如果item未被处理过，则进行处理
-                    if (!processedLinks.contains(link)) {
+                    if (!xmlContent.contains(link)) {
                         SyndEntry newEntry;
                         if (rssSource.getType().equals(RssSource.Type.ARTICLE)) {
                             newEntry = aiHandler.handleArticle(syndEntry);
                         } else {
                             newEntry = aiHandler.handleVideo(syndEntry);
                         }
-                        // 将item的链接添加到已处理链接的哈希表中
-                        processedLinks.add(link);
                         newEntries.add(newEntry);
                     }
                 }
@@ -85,6 +88,7 @@ public class RssHandler {
                         e.printStackTrace();
                     }
                 }
+                System.out.println("更新结束");
             } catch (IOException | IllegalArgumentException | FeedException e) {
                 e.printStackTrace();
             } catch (URISyntaxException e) {
@@ -94,7 +98,7 @@ public class RssHandler {
 
         // 将任务绑定到一个线程上，并启动线程
         // 该线程会每隔一定时间（例如，60秒）执行一次任务
-        ScheduledFuture<?> future = executorService.scheduleAtFixedRate(task, 0, 60, TimeUnit.SECONDS);
+        ScheduledFuture<?> future = executorService.scheduleAtFixedRate(task, 0, 60*10, TimeUnit.SECONDS);
         // 将RssSource和对应的ScheduledFuture存入futureMap
         futureMap.put(rssSource, future);
     }

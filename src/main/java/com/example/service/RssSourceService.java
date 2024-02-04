@@ -3,6 +3,10 @@ package com.example.service;
 import com.example.model.RssSource;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,10 +27,10 @@ public class RssSourceService {
     }
 
     // 删除一个RssSource，并关闭对应的处理线程
-    public void deleteRssSource(String name) {
+    public void deleteRssSource(int id) {
         RssSource toDelete = null;
         for (RssSource rssSource : rssSources) {
-            if (rssSource.getName().equals(name)) {
+            if (rssSource.getId() == id) {
                 toDelete = rssSource;
                 break;
             }
@@ -37,22 +41,19 @@ public class RssSourceService {
         }
     }
 
-    // 获取所有RssSource的名称
-    public List<String> getAllRssSourcesName() {
-        List<String> names = new ArrayList<>();
-        for (RssSource rssSource : rssSources) {
-            names.add(rssSource.getName());
-        }
-        return names;
+    // 获取所有RssSource
+    public List<RssSource> getAllRssSources() {
+        return rssSources;
     }
 
-    // 获取指定名称的RssSource
-    public RssSource getRssSource(String name) {
-        for (RssSource rssSource : rssSources) {
-            if (rssSource.getName().equals(name)) {
-                return rssSource;
-            }
+    // 获取指定id的RssSource
+    public String getRssSource(int id) {
+        try {
+            Path path = Paths.get("rssFiles/" + id + ".xml");
+            return new String(Files.readAllBytes(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 }

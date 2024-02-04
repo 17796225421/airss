@@ -23,7 +23,8 @@ public class AIHandler {
         newEntry.setPublishedDate(syndEntry.getPublishedDate());
 
         // 调用http服务获取description
-        String description = callHttpService("http://127.0.0.1:8081/generateText?url=" + syndEntry.getLink());
+        String description = callHttpService("http://127.0.0.1:8083/generateText?url=" + syndEntry.getLink());
+        System.out.println("title: "+syndEntry.getTitle()+"\n"+"url: "+syndEntry.getLink()+"\n"+"description"+description+"\n");
         SyndContent syndContent = new SyndContentImpl();
         syndContent.setValue(description);
         newEntry.setDescription(syndContent);
@@ -39,7 +40,8 @@ public class AIHandler {
         newEntry.setPublishedDate(syndEntry.getPublishedDate());
 
         // 调用http服务获取description
-        String description = callHttpService("http://127.0.0.1:8082/processVideo?url=" + syndEntry.getLink());
+        String description = callHttpService("http://127.0.0.1:9502/processVideo?url=" + syndEntry.getLink());
+        System.out.println("title: "+syndEntry.getTitle()+"\n"+"url: "+syndEntry.getLink()+"\n"+"description"+description+"\n");
         SyndContent syndContent = new SyndContentImpl();
         syndContent.setValue(description);
         newEntry.setDescription(syndContent);
