@@ -1,10 +1,12 @@
 package com.example.service;
 
 import com.example.model.RssSource;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class RssSourceService {
     private List<RssSource> rssSources; // 管理所有RssSource
     private RssHandler rssHandler; // RssHandler对象，用于处理RssSource

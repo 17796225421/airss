@@ -1,16 +1,25 @@
 package com.example.service;
 
 import com.example.model.RssSource;
-import com.rometools.rome.feed.rss.Item;
 import com.rometools.rome.feed.synd.SyndEntry;
+import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.feed.synd.SyndFeedImpl;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
+import com.rometools.rome.io.SyndFeedOutput;
 import com.rometools.rome.io.XmlReader;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class RssHandler {
     private ScheduledExecutorService executorService;
@@ -27,27 +36,59 @@ public class RssHandler {
         // 创建一个哈希表来存储已处理过的item的链接
         Set<String> processedLinks = new HashSet<>();
 
+        // 创建一个SyndFeed对象
+        SyndFeed feed = new SyndFeedImpl();
+        feed.setFeedType("rss_2.0");
+        feed.setTitle(rssSource.getName());
+        feed.setLink(rssSource.getUrl());
+        feed.setDescription(rssSource.getUrl());
+        feed.setEntries(new ArrayList<>());
+
+        // 创建一个XML文件
+        File file = new File("rssFiles/" + rssSource.getName() + ".xml");
+        try (Writer writer = new FileWriter(file)) {
+            new SyndFeedOutput().output(feed, writer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // 创建一个Runnable任务，该任务会周期性地读取RSS源的所有item，并处理未处理过的item
         Runnable task = () -> {
             try {
                 URL feedUrl = new URL(rssSource.getUrl());
                 SyndFeedInput input = new SyndFeedInput();
                 List<SyndEntry> items = input.build(new XmlReader(feedUrl)).getEntries();
-                for (SyndEntry item : items) {
-                    String link = item.getLink();
+                List<SyndEntry> newEntries = new ArrayList<>();
+                for (SyndEntry syndEntry : items) {
+                    String link = syndEntry.getLink();
                     // 如果item未被处理过，则进行处理
                     if (!processedLinks.contains(link)) {
+                        SyndEntry newEntry;
                         if (rssSource.getType().equals(RssSource.Type.ARTICLE)) {
-                            //aiHandler.handleArticle(item);
+                            newEntry = aiHandler.handleArticle(syndEntry);
                         } else {
-                            //aiHandler.handleVideo(item);
+                            newEntry = aiHandler.handleVideo(syndEntry);
                         }
                         // 将item的链接添加到已处理链接的哈希表中
                         processedLinks.add(link);
+                        newEntries.add(newEntry);
+                    }
+                }
+                // 更新XML文件
+                synchronized (file) {
+                    SyndFeed oldFeed = new SyndFeedInput().build(file);
+                    List<SyndEntry> oldEntries = oldFeed.getEntries();
+                    oldEntries.addAll(newEntries);
+                    try (Writer writer = new FileWriter(file)) {
+                        new SyndFeedOutput().output(oldFeed, writer);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             } catch (IOException | IllegalArgumentException | FeedException e) {
                 e.printStackTrace();
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
             }
         };
 
