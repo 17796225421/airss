@@ -36,6 +36,6 @@ public class RssController {
     // 获取指定rss源，使用id作为参数
     @GetMapping("/get/{id}")
     public String getRssSource(@PathVariable int id) {
-        return rssSourceService.getRssSource(id);
+        return rssSourceService.getRssSourceXmlText(id);
     }
 }

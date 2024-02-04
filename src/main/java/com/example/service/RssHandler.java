@@ -42,16 +42,6 @@ public class RssHandler {
         feed.setDescription("无");
         feed.setEntries(new ArrayList<>());
 
-        // 创建一个XML文件
-        File file = new File("rssFiles/" + rssSource.getId() + ".xml");
-        if (!file.exists()) { // 如果文件不存在
-            try (Writer writer = new FileWriter(file)) {
-                new SyndFeedOutput().output(feed, writer);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
         // 创建一个Runnable任务，该任务会周期性地读取RSS源的所有item，并处理未处理过的item
         Runnable task = () -> {
             try {
@@ -61,8 +51,8 @@ public class RssHandler {
                 List<SyndEntry> newEntries = new ArrayList<>();
                 System.out.println("更新开始");
 
-                // 读取XML文件内容
-                String xmlContent = new String(Files.readAllBytes(file.toPath()));
+                // 读取xmlText的内容
+                String xmlContent = rssSource.getXmlText();
 
                 for (SyndEntry syndEntry : items) {
                     String link = syndEntry.getLink();
@@ -77,17 +67,9 @@ public class RssHandler {
                         newEntries.add(newEntry);
                     }
                 }
-                // 更新XML文件
-                synchronized (file) {
-                    SyndFeed oldFeed = new SyndFeedInput().build(file);
-                    List<SyndEntry> oldEntries = oldFeed.getEntries();
-                    oldEntries.addAll(newEntries);
-                    try (Writer writer = new FileWriter(file)) {
-                        new SyndFeedOutput().output(oldFeed, writer);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+                // 更新xmlText的内容
+                rssSource.setXmlText(xmlContent + newEntries.toString());
+
                 System.out.println("更新结束");
             } catch (IOException | IllegalArgumentException | FeedException e) {
                 e.printStackTrace();
