@@ -17,16 +17,20 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="30e54ed4-e578-430f-bf7d-b75561cb1d59">
-      <console name="airss" type="STANDARD" schema="airss" session="Main"><![CDATA[SELECT * FROM rss_source;]]></console>
+      <console name="airss" type="STANDARD" schema="airss" session="Main"><![CDATA[SELECT rss_id, rss_name, rss_url, rss_type, rss_xml_data FROM rss_source
+
+
+-- 插入一些测试数据
+INSERT INTO rss_source (rss_name, rss_url, rss_type, rss_xml_data)
+VALUES ('跑路知乎文章', 'https://rsshub.app/zhihu/xhu/people/activities/0180e306adeed675656f1e3599f79c78', 1, null),
+       ('蔡先生知乎收藏夹', 'https://rsshub.app/zhihu/xhu/collection/26444956', 1, null);]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
     <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files>
-      <object connection-id="30e54ed4-e578-430f-bf7d-b75561cb1d59" object-ref="consoles/airss" />
-    </open-files>
+    <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="30e54ed4-e578-430f-bf7d-b75561cb1d59" />
@@ -37,12 +41,17 @@
   <component name="DBNavigator.Project.ExecutionManager">
     <retain-sticky-names value="false" />
   </component>
+  <component name="DBNavigator.Project.FileConnectionMappingManager">
+    <mapping file-url="file://$PROJECT_DIR$/src/main/resources/sql/create_table.sql" connection-id="30e54ed4-e578-430f-bf7d-b75561cb1d59" session-id="POOL" current-schema="airss" />
+  </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
     <filters />
   </component>
   <component name="DBNavigator.Project.ScriptExecutionManager" clear-outputs="true">
-    <recently-used-interfaces />
+    <recently-used-interfaces>
+      <mapping database-type="MYSQL" interface-id="DEFAULT" />
+    </recently-used-interfaces>
   </component>
   <component name="DBNavigator.Project.Settings">
     <connections>

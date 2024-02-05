@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.RssSourceMapper">
+
+    <!-- 插入 RSS 源 -->
+    <insert id="insertRssSource" parameterType="RssSource" useGeneratedKeys="true" keyProperty="rssId">
+        INSERT INTO rss_source (rss_name, rss_url, rss_type, rss_xml_data)
+        VALUES (#{rssName}, #{rssUrl}, #{rssType}, #{rssXmlData})
+    </insert>
+
+    <!-- 删除 RSS 源 -->
+    <delete id="deleteRssSource">
+        DELETE FROM rss_source WHERE rss_id = #{rssId}
+    </delete>
+
+    <!-- 查询所有的 RSS 源（不包括 XML 数据） -->
+    <select id="selectAllRssSourcesWithoutXmlData" resultType="RssSourceWithoutXmlDataDTO">
+        SELECT rss_id, rss_name, rss_url, rss_type FROM rss_source
+    </select>
+
+    <!-- 查询 RSS 源的 XML 数据 -->
+    <select id="selectRssSourcesXmlData" resultType="String">
+        SELECT rss_xml_data FROM rss_source WHERE rss_id = #{rssId}
+    </select>
+
+    <!-- 查询所有的 RSS 源 -->
+    <select id="selectAllRssSources" resultType="RssSource">
+        SELECT * FROM rss_source
+    </select>
+
+    <select id="selectAllRssIds" resultType="int">
+        SELECT rssId FROM RssSource
+    </select>
+
+    <update id="updateRssXmlDataById">
+        UPDATE RssSource SET rssXmlData = #{rssXmlData} WHERE rssId = #{rssId}
+    </update>
+
+    <!-- 更新 RSS 源 -->
+    <update id="update">
+        UPDATE rss_source
+        SET rss_name = #{rssName}, rss_url = #{rssUrl}, rss_type = #{rssType}, rss_xml_data = #{rssXmlData}
+        WHERE rss_id = #{rssId}
+    </update>
+</mapper>

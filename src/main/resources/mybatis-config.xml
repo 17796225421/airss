@@ -1,0 +1,24 @@
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!-- 开启MyBatis的日志 -->
+    <settings>
+        <setting name="logImpl" value="SLF4J"/>
+        <!-- 开启自动映射 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
+
+    <!-- 类型别名定义 -->
+    <typeAliases>
+        <!-- RssSource模型类别名定义 -->
+        <typeAlias alias="RssSource" type="com.example.model.RssSource" />
+        <!-- RssSourceWithoutXmlDataDTO模型类别名定义 -->
+        <typeAlias alias="RssSourceWithoutXmlDataDTO" type="com.example.model.RssSourceWithoutXmlDataDTO" />
+    </typeAliases>
+
+    <mappers>
+        <mapper resource="mapper/RssSourceMapper.xml"/>
+    </mappers>
+
+</configuration>

@@ -3,10 +3,10 @@ package com.example.model;
 import lombok.Data;
 
 /**
- * 该类定义了RSS源的属性，对应数据库中的一张表
+ * 该类定义了RSS源的属性（不包括XML数据），对应数据库中的一张表
  */
 @Data
-public class RssSource {
+public class RssSourceWithoutXmlDataDTO {
     /**
      * RSS源ID，作为主键
      */
@@ -23,8 +23,4 @@ public class RssSource {
      * RSS源的类型，分为文章和视频两种
      */
     private int rssType;
-    /**
-     * RSS源的XML数据
-     */
-    private String rssXmlData;
 }
