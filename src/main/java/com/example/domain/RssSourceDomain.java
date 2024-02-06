@@ -63,58 +63,57 @@ public class RssSourceDomain {
      * @param rssSource RSS源
      */
     public void updateRssSource(RssSource rssSource) {
-        log.debug("开始更新RSS源: {}", rssSource.getRssName());   // 添加debug日志，打印当前正在更新的RSS源名称
+        log.debug("开始更新RSS源: {}", rssSource.getRssName());
         try {
             URL url = new URL(rssSource.getRssUrl());
             SAXBuilder builder = new SAXBuilder();
             Document document = builder.build(url);
-            log.debug("成功从URL获取文档: {}", url);  // 添加debug日志，打印成功获取文档的消息
+            log.debug("成功从URL获取文档: {}", url);
 
-            // 获取新xml中的所有item
             Element rss = document.getRootElement();
             Element channel = rss.getChild("channel");
             List<Element> items = channel.getChildren("item");
-            log.debug("获取到 {} 个项目", items.size()); // 添加debug日志，打印获取到的项目数量
+            log.debug("获取到 {} 个项目", items.size());
 
             String oldXmlData = rssSource.getRssXmlData();
             Document oldDocument = builder.build(new StringReader(oldXmlData));
             Element oldRss = oldDocument.getRootElement();
             Element oldChannel = oldRss.getChild("channel");
 
-            // 判断新xml中的item是否在旧xml中存在，如果不存在则处理新item并插入到旧xml中
             for (Element item : items) {
                 String link = item.getChildText("link");
                 if (!oldXmlData.contains(link)) {
-                    String description = ""; // 初始化描述字符串
-                    // 如果rssSource的type是文章，就调用aiDomain的processArticle(link)，否则处理视频
+                    String description = "";
                     if (rssSource.getRssType() == RssSourceTypeEnum.ARTICLE.getValue()) {
-                        description = aiDomain.processArticle(link); // 使用链接作为参数
+                        description = aiDomain.processArticle(link);
                     } else {
-                        description = aiDomain.processVideo(link); // 使用链接作为参数
+                        description = aiDomain.processVideo(link);
                     }
-                    log.debug("处理完成，链接地址：{}，描述：{}", link, description); // 添加debug日志，打印成功处理完成的消息
+                    log.debug("处理完成，链接地址：{}，描述：{}", link, description);
 
-                    // 将获得的描述设置为item的description
-                    Element descriptionElement = new Element("description");
-                    descriptionElement.setText(description);
-                    item.addContent(descriptionElement);
-                    Element newItem = copyElement(item); // 创建一个新的item，复制原item的内容
-                    oldChannel.addContent(newItem); // 将新item添加到oldChannel
+                    Element descriptionElement = item.getChild("description");
+                    if (descriptionElement != null) {
+                        item.removeContent(descriptionElement); // 删除旧的description
+                    }
+                    descriptionElement = new Element("description"); // 创建新的description元素
+                    descriptionElement.setText(description); // 设置新的description
+                    item.addContent(descriptionElement); // 添加新的description到item
+
+                    Element newItem = copyElement(item);
+                    oldChannel.addContent(newItem);
                 }
             }
 
-            // 创建一个新的Format实例，设置缩进为4个空格，添加换行，然后创建一个新的XMLOutputter
             Format format = Format.getPrettyFormat();
             format.setIndent("    ");
             XMLOutputter outputter = new XMLOutputter(format);
 
-            // 更新rssSource的xml数据并保存到数据库
             rssSource.setRssXmlData(outputter.outputString(oldDocument));
             rssSourceMapper.update(rssSource);
-            log.debug("更新数据库成功，RSS源: {}", rssSource.getRssName()); // 添加debug日志，打印成功更新数据库的消息
+            log.debug("更新数据库成功，RSS源: {}", rssSource.getRssName());
 
         } catch (Exception e) {
-            log.error("更新RSS源出错，RSS源: {}", rssSource.getRssName(), e); // 添加错误日志，打印错误消息和异常堆栈信息
+            log.error("更新RSS源出错，RSS源: {}", rssSource.getRssName(), e);
             e.printStackTrace();
         }
     }
